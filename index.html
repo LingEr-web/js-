@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>测试</title>
+</head>
+
+<body>
+    <input id="fileId" type="file" onchange="fileChange()" name="file"></input>
+    <img id="ItemPreview" src="" width="100" height="100">
+</body>
+<script src="base64.js"></script>
+<script>
+    /**
+     * 网络图像文件转Base64
+     */
+    function  getBase64Image(img)  {      
+        const  canvas  =  document.createElement("canvas");      
+        canvas.width  =  img.width;      
+        canvas.height  =  img.height;      
+        canvas.getContext("2d").drawImage(img,  0,  0);      
+        return  canvas.toDataURL("image/png");    
+    }
+    /**
+     *Base64字符串转二进制
+     */
+    function dataURLtoBlob(dataurl) {
+        var arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], {
+            type: mime
+        });
+    }
+    /**
+      二进制转base64
+    */
+    function blobToDataURL(blob, callback) {
+        var a = new FileReader();
+        a.onload = function(e) {
+            callback(e.target.result);
+        }
+        a.readAsDataURL(blob);
+        return a;
+    }
+
+    window.onload = function() {
+        var oReq = new XMLHttpRequest();
+        oReq.open("GET", "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2256920272,2188849592&fm=26&gp=0.jpg", true);
+        oReq.responseType = "arraybuffer";
+        oReq.onload = function(oEvent) {
+            var arrayBuffer = oReq.response; // Note: not oReq.responseText
+            if (arrayBuffer) {
+                var byteArray = new Uint8Array(arrayBuffer);
+                console.log(byteArray)
+                console.log(bytesToBase64(byteArray))
+                var ItemPreview = document.getElementById('ItemPreview')
+                ItemPreview.src = 'data:image/jpg;base64,' + bytesToBase64(byteArray); 
+            }
+
+        };
+        oReq.send(null);
+
+
+        // const  img  =  new  Image();
+        // img.style.display  =  "none";
+        // img.crossOrigin  =  "Anonymous";      
+        // img.src  = "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2256920272,2188849592&fm=26&gp=0.jpg"; 
+        // img.onload  =   function ()  {        
+        //     const  base64Url  =  getBase64Image(img);   
+        //     var ItemPreview = document.getElementById('ItemPreview')
+        //     ItemPreview.src = base64Url; 
+        //     const blobUrl = dataURLtoBlob(base64Url);
+        //     const byteArray = new Uint8Array(blobUrl)
+        //     console.log(blobUrl, byteArray)
+        //         // console.log(base64Url);      
+        // };    
+    }
+
+    function fileChange() {
+        var file = document.getElementById('fileId').files[0];
+        var FileName = file.name;　　
+        var FileSize = file.size;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var byteArray = btoa(reader.result);
+            var ItemPreview = document.getElementById('ItemPreview')
+            ItemPreview.src = 'data:image/jpg;base64,' + byteArray; 
+        }
+        reader.readAsBinaryString(file)
+    }
+</script>
+
+</html>
